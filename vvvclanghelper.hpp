@@ -24,6 +24,7 @@ bool isInMainFile(const clang::Decl* d);
  * Test is decl is struct or class
  * */
 bool isRecord(const clang::Decl* decl);
+bool isNonTemplateFunction(const clang::Decl* decl);
 
 std::vector<const clang::Decl*>
 getDeclarations(const clang::ASTContext& context);

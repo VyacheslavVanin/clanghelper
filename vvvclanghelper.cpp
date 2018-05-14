@@ -53,6 +53,11 @@ bool isInMainFile(const Decl* d)
     return d->getASTContext().getSourceManager().isInMainFile(d->getLocStart());
 }
 
+bool isNonTemplateFunction(const clang::Decl* d)
+{
+    return d->isFunctionOrFunctionTemplate() && !d->isTemplateDecl();
+}
+
 std::vector<const Decl*> getDeclarations(const ASTContext& context)
 {
     std::vector<const Decl*> ret;
