@@ -43,6 +43,16 @@ bool isSystemDecl(const Decl* d)
         d->getLocStart());
 }
 
+bool isNonSystemDecl(const Decl* d)
+{
+    return !isSystemDecl(d);
+}
+
+bool isInMainFile(const Decl* d)
+{
+    return d->getASTContext().getSourceManager().isInMainFile(d->getLocStart());
+}
+
 std::vector<const Decl*> getDeclarations(const ASTContext& context)
 {
     std::vector<const Decl*> ret;
@@ -56,20 +66,12 @@ std::vector<const Decl*> getDeclarations(const ASTContext& context)
 
 std::vector<const Decl*> getNonSystemDeclarations(const ASTContext& context)
 {
-    const auto decls = getDeclarations(context);
-    return filter(decls, [](const Decl* d) {
-        return !d->getASTContext().getSourceManager().isInSystemHeader(
-            d->getLocStart());
-    });
+    return filter(getDeclarations(context), isNonSystemDecl);
 }
 
 std::vector<const Decl*> getMainFileDeclarations(const ASTContext& context)
 {
-    const auto decls = getDeclarations(context);
-    return filter(decls, [](const Decl* d) {
-        return d->getASTContext().getSourceManager().isInMainFile(
-            d->getLocStart());
-    });
+    return filter(getDeclarations(context), isInMainFile);
 }
 
 std::vector<const FunctionDecl*>

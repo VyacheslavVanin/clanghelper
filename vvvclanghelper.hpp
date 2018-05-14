@@ -17,6 +17,8 @@ std::string decl2str(const clang::Decl* d);
 std::string decl2str(const clang::Stmt* d, const clang::ASTContext& context);
 
 bool isSystemDecl(const clang::Decl* d);
+bool isNonSystemDecl(const clang::Decl* d);
+bool isInMainFile(const clang::Decl* d);
 
 /**
  * Test is decl is struct or class
