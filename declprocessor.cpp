@@ -54,15 +54,14 @@ public:
 };
 } // namespace
 
-void visit_decls(int argc, const char** argv, const decl_processor_t& f)
+void visit_decls(int argc, const char** argv, const decl_processor_t& f,
+                 const std::vector<std::string>& my_params)
 {
     if (argc < 2) {
         std::cerr << "fatal error: no input files" << std::endl;
     }
 
-    static const std::vector<std::string> myParameters = {};
-
-    const auto params = CxxToolArgs(argc, argv, myParameters);
+    const auto params = CxxToolArgs(argc, argv, my_params);
 
     for (const auto& name : params.getFilenames()) {
         using namespace clang::tooling;
