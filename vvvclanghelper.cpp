@@ -37,6 +37,12 @@ std::string decl2str(const clang::Stmt* d, const clang::ASTContext& context)
                        sm.getCharacterData(e) - sm.getCharacterData(b));
 }
 
+std::string getLocation(const clang::Decl* d)
+{
+    const auto& sm = d->getASTContext().getSourceManager();
+    return d->getLocation().printToString(sm);
+}
+
 bool isSystemDecl(const Decl* d)
 {
     return d->getASTContext().getSourceManager().isInSystemHeader(

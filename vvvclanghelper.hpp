@@ -15,6 +15,7 @@ std::string getComment(const clang::Decl* d);
 
 std::string decl2str(const clang::Decl* d);
 std::string decl2str(const clang::Stmt* d, const clang::ASTContext& context);
+std::string getLocation(const clang::Decl* d);
 
 bool isSystemDecl(const clang::Decl* d);
 bool isNonSystemDecl(const clang::Decl* d);
