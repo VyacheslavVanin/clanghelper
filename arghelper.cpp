@@ -1,6 +1,6 @@
 #include "arghelper.hpp"
-#include "vvvclanghelper.hpp"
 #include "stdhelper/containerhelper.hpp"
+#include "vvvclanghelper.hpp"
 
 using string_list = CxxToolArgs::string_list;
 using namespace vvv::helpers;
@@ -67,11 +67,85 @@ std::vector<std::string> autoDetectFlags(const std::string& filename)
     // remove command (/usr/bin/c++) and -c ..foo.cpp -o ..foo.o
     return std::vector<std::string>(cl.begin() + 1, cl.end() - 4);
 }
+
+std::string dump_process_cout(const std::string& command)
+{
+    std::string ret;
+    FILE* fd = popen(command.data(), "r");
+    if (!fd)
+        return ret;
+
+    const size_t buff_size = 256;
+    char buf[buff_size];
+    while (true) {
+        const size_t bytes_read = fread(buf, 1, buff_size, fd);
+        if (bytes_read < 1)
+            break;
+
+        ret.append(buf, bytes_read);
+
+        if (bytes_read < buff_size)
+            break;
+    }
+    fclose(fd);
+
+    const auto i = ret.rfind("\n");
+    if (i != std::string::npos)
+        ret.resize(i);
+
+    return ret;
+}
+
+void substitute(std::string& text, const std::string& search,
+                const std::string& replace)
+{
+    auto i = text.find(search);
+    if (i == std::string::npos)
+        return;
+
+    const auto size = search.size();
+    text.replace(i, size, replace);
+}
+
+void addInclude(string_list& list, const std::string& path,
+                const std::string& gcc_version)
+{
+    std::string p = path;
+    substitute(p, "{}", gcc_version);
+    list.push_back("-isystem");
+    list.push_back(std::move(p));
+}
+
+/**
+ * @brief Crutch to avoid such errors:<br>
+ * <pre>/usr/include/stdio.h:33:10: fatal error: 'stddef.h' file not found</pre>
+ */
+string_list makeDefaultCompilerIncludes()
+{
+    static const auto& gcc_version = dump_process_cout("gcc -dumpversion");
+    static const auto paths = {
+        "/usr/include/c++/{}/",
+        "/usr/include/c++/{}/x86_64-pc-linux-gnu",
+        "/usr/lib/gcc/x86_64-pc-linux-gnu/{}/include",
+        "/usr/lib/gcc/x86_64-pc-linux-gnu/{}/include-fixed",
+        "/usr/include",
+        "/usr/local/include",
+    };
+
+    string_list ret;
+    for (const auto& p : paths)
+        addInclude(ret, p, gcc_version);
+
+    return ret;
+}
+
 } // namespace
 
 CxxToolArgs::CxxToolArgs(int argc, const char** argv,
                          const string_list& tool_flags)
 {
+    static const auto default_includes = makeDefaultCompilerIncludes();
+
     const auto myParamFilter = [&tool_flags](const auto& p) {
         return contain(tool_flags, p);
     };
@@ -83,7 +157,7 @@ CxxToolArgs::CxxToolArgs(int argc, const char** argv,
 
     const auto allParams = filterNotSourceFiles(args);
     custom_params = filter(allParams, myParamFilter);
-    compiler_params = filter(allParams, notMyParamsFilter);
+    compiler_params = filter(allParams, notMyParamsFilter) + default_includes;
     filenames = filterSourceFiles(args);
 }
 
