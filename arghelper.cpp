@@ -44,15 +44,18 @@ std::vector<std::string> autoDetectFlags(const std::string& filename)
 {
     using clang::tooling::CompilationDatabase;
 
+    char path[PATH_MAX];
+    realpath(filename.data(), path);
+
     std::string error;
     const auto compile_db =
-        CompilationDatabase::autoDetectFromSource(filename, error);
+        CompilationDatabase::autoDetectFromSource(path, error);
     if (!compile_db) {
         std::cerr << error << "\n";
         return {};
     }
 
-    const auto& ccs = compile_db->getCompileCommands(filename);
+    const auto& ccs = compile_db->getCompileCommands(path);
     if (ccs.empty())
         return {};
 
