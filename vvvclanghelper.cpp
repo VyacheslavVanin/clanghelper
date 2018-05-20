@@ -14,7 +14,7 @@ std::string getComment(const Decl* d)
     return "";
 }
 
-std::string decl2str(const clang::Decl* d)
+std::string to_string(const clang::Decl* d)
 {
     using namespace clang;
     const auto& context = d->getASTContext();
@@ -26,7 +26,7 @@ std::string decl2str(const clang::Decl* d)
                        sm.getCharacterData(e) - sm.getCharacterData(b));
 }
 
-std::string decl2str(const clang::Stmt* d, const clang::ASTContext& context)
+std::string to_string(const clang::Stmt* d, const clang::ASTContext& context)
 {
     using namespace clang;
     const auto& sm = context.getSourceManager();
@@ -149,7 +149,7 @@ void printFunction(const FunctionDecl* d)
              << p->getType().getAsString() << endl;
 
     if (d->hasBody())
-        cout << decl2str(d->getBody(), d->getASTContext()) << endl << endl;
+        cout << to_string(d->getBody(), d->getASTContext()) << endl << endl;
 }
 
 void printStructure(const CXXRecordDecl* d)
