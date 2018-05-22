@@ -6,7 +6,12 @@
 #include "clanghelper/arghelper.hpp"
 #include "clanghelper/stdhelper/containerhelper.hpp"
 #include "clanghelper/vvvclanghelper.hpp"
+#include <clang/Basic/Version.h>
+#if CLANG_VERSION_MAJOR >= 6
 #include <clang/Analysis/AnalysisDeclContext.h>
+#else
+#include <clang/Analysis/AnalysisContext.h>
+#endif
 
 using namespace vvv::helpers;
 
